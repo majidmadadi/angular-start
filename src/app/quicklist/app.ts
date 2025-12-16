@@ -5,12 +5,15 @@ import { RouterOutlet } from '@angular/router';
   selector: 'app-root',
   imports: [RouterOutlet],
   template: `
-    <h1>Welcome to {{ title() }}!</h1>
-
-    <router-outlet />
+    <main>
+      <router-outlet />
+    </main>
   `,
-  styles: [],
+  styles: [`
+    main{
+      padding: 0 20px;
+    }
+  `],
 })
-export class App {
-  protected readonly title = signal('angular-start');
+export class QuickListApp {
 }
