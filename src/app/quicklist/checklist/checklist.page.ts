@@ -36,9 +36,6 @@ import {FormBuilder, ReactiveFormsModule, Validators} from '@angular/forms';
                             })
                             :checklistService.addItem$.next(formGroup.getRawValue())"></app-edit-item>
           </div>
-          <div class="space-between">
-            <button matButton>Save</button>
-          </div>
         </div>
       </modal>
 
@@ -68,9 +65,18 @@ export class ChecklistPage {
   constructor() {
     effect(() => {
       const item = this.beingEditedItem();
-      if(!item?.id){
+      if(!item){
         this.formGroup.reset();
+      }else{
+        this.formGroup.patchValue({
+          title: item.title
+        })
       }
+    });
+
+    effect(() => {
+      this.checklistService.listItems();
+      this.beingEditedItem.set(null);
     });
   }
 }

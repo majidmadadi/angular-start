@@ -1,25 +1,29 @@
-import {Component, contentChild, effect, inject, input, output, TemplateRef, viewChild} from '@angular/core';
+import {Component, effect, inject, input, output, TemplateRef, viewChild} from '@angular/core';
 import {Dialog} from '@angular/cdk/dialog';
-import {MatButton} from '@angular/material/button';
+import {MatIconButton} from '@angular/material/button';
+import {MatIcon} from '@angular/material/icon';
 
 @Component({
   selector: 'modal',
   template: `
     <ng-template>
       <div class="title">
-        <button matButton (click)="close.emit()">Close</button>
+        <button matIconButton (click)="close.emit()">
+          <mat-icon>close</mat-icon>
+        </button>
       </div>
       <ng-content></ng-content>
     </ng-template>
   `,
   imports: [
-    MatButton
+    MatIcon,
+    MatIconButton
   ],
   styles: [`
     .title {
-      top: 0;
-      right: 0;
-      position: relative;
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
     }
   `]
 })
