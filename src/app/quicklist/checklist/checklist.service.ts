@@ -1,5 +1,5 @@
 import {computed, Injectable, signal} from '@angular/core';
-import {ChecklistItem} from './checklistItem';
+import {ChecklistEditItem, ChecklistItem} from './types';
 import {Subject} from 'rxjs';
 @Injectable({
   providedIn: 'root'
@@ -8,8 +8,8 @@ export class ChecklistService {
   protected readonly state=
     signal<ChecklistItem[]>([{id:'1',title:'First list item'}])
 
-  addItem$ = new Subject<ChecklistItem>();
-  editItem$ = new Subject<ChecklistItem>();
+  addItem$ = new Subject<{ title:string }>();
+  editItem$ = new Subject<ChecklistEditItem>();
   deleteItem$ = new Subject<string>();
 
   listItems = computed(()=> this.state())
@@ -17,11 +17,18 @@ export class ChecklistService {
   constructor() {
       this.addItem$
         .pipe(takeUntilDestroyed())
-        .subscribe(x=>this.state.update(s=>[...s,x]));
+        .subscribe(x=>this.state.update(s=>[...s,{
+          id:new Date().getTime().toString(),
+          title:x.title
+        }]));
 
       this.editItem$
         .pipe(takeUntilDestroyed())
-        .subscribe(x=>this.state.update(s=>[...s.filter(f=>f.id!==x.id),x]));
+        .subscribe(x=>
+          this.state.update(s=>[...s.filter(f=>f.id!==x.id),{
+            id:x.id,
+            title:x.data.title
+          }]));
 
       this.deleteItem$
         .pipe(takeUntilDestroyed())

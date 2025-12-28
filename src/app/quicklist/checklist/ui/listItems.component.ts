@@ -1,5 +1,5 @@
 import {Component, input, OnInit, output} from '@angular/core';
-import {ChecklistItem} from '../checklistItem';
+import {ChecklistItem} from '../types';
 import {MatList, MatListItem} from '@angular/material/list';
 import {MatButton} from '@angular/material/button';
 

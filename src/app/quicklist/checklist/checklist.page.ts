@@ -1,36 +1,40 @@
-import {Component, inject, signal} from '@angular/core';
+import {Component, effect, inject, signal} from '@angular/core';
 import {MatButton, MatMiniFabButton} from '@angular/material/button';
 import {ModalComponent} from '../../shared/util/modal.component';
-import {MatIcon} from '@angular/material/icon';
 import {ListItemsComponent} from './ui/listItems.component';
 import {ChecklistService} from './checklist.service';
-import {ChecklistItem} from './checklistItem';
+import {ChecklistItem} from './types';
+import {EditItemComponent} from './ui/edititem.component';
+import {FormBuilder, ReactiveFormsModule, Validators} from '@angular/forms';
 
 @Component({
   selector: 'checklist',
   imports: [
     MatButton,
     ModalComponent,
-    MatIcon,
-    MatMiniFabButton,
-    ListItemsComponent
+    ListItemsComponent,
+    EditItemComponent,
+    ReactiveFormsModule
   ],
   template: `
     <header>
       <h1 class="mat-display-1">QuickLists</h1>
-      <button matButton="outlined" (click)="showModal.set(true)">Add Item</button>
+      <button matButton="outlined" (click)="beingEditedItem.set({})">Add Item</button>
     </header>
     <main>
-      <modal [show]="showModal()">
+      <modal [show]="!!beingEditedItem()" (close)="beingEditedItem.set(null)">
         <div>
           <div class="space-between">
             <h4>Add new item</h4>
-            <button matMiniFab (click)="showModal.set(false)">
-              <mat-icon>close</mat-icon>
-            </button>
           </div>
           <div>
-
+            <app-edit-item [formGroup]="formGroup"
+                           (save)="beingEditedItem()?.id
+                             ? checklistService.editItem$.next({
+                                id:beingEditedItem()!.id!,
+                                data: formGroup.getRawValue(),
+                            })
+                            :checklistService.addItem$.next(formGroup.getRawValue())"></app-edit-item>
           </div>
           <div class="space-between">
             <button matButton>Save</button>
@@ -39,7 +43,7 @@ import {ChecklistItem} from './checklistItem';
       </modal>
 
       <app-listitems [items]="checklistService.listItems()"
-                     (editItem)="checklistService.editItem$.next($event)"
+                     (editItem)="beingEditedItem.set($event)"
                      (deleteItem)="checklistService.deleteItem$.next($event)"></app-listitems>
 
     </main>
@@ -54,8 +58,19 @@ import {ChecklistItem} from './checklistItem';
   `]
 })
 export class ChecklistPage {
-  showModal= signal(false);
-  beingEditedItem= signal<ChecklistItem|{}>({})
+  beingEditedItem= signal<Partial<ChecklistItem>|null>(null);
   checklistService= inject(ChecklistService);
+  fb= inject(FormBuilder);
+  formGroup= this.fb.nonNullable.group({
+    title:['', Validators.required],
+  })
 
+  constructor() {
+    effect(() => {
+      const item = this.beingEditedItem();
+      if(!item?.id){
+        this.formGroup.reset();
+      }
+    });
+  }
 }
