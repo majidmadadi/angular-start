@@ -1,5 +1,5 @@
 import {Component, effect, inject, signal} from '@angular/core';
-import {MatButton, MatMiniFabButton} from '@angular/material/button';
+import {MatButton} from '@angular/material/button';
 import {ModalComponent} from '../../shared/util/modal.component';
 import {ListItemsComponent} from './ui/listItems.component';
 import {ChecklistService} from './checklist.service';
@@ -24,17 +24,18 @@ import {FormBuilder, ReactiveFormsModule, Validators} from '@angular/forms';
     <main>
       <modal [show]="!!beingEditedItem()" (close)="beingEditedItem.set(null)">
         <div>
-          <div class="space-between">
-            <h4>Add new item</h4>
-          </div>
           <div>
             <app-edit-item [formGroup]="formGroup"
+                           (close)="beingEditedItem.set(null)"
                            (save)="beingEditedItem()?.id
                              ? checklistService.editItem$.next({
                                 id:beingEditedItem()!.id!,
                                 data: formGroup.getRawValue(),
                             })
-                            :checklistService.addItem$.next(formGroup.getRawValue())"></app-edit-item>
+                            :checklistService.addItem$.next(formGroup.getRawValue())"
+                           [title]="beingEditedItem()?.id?'Edit Item '+beingEditedItem()?.id:'Add New Item'"
+                           [visible]="!!beingEditedItem()"
+            ></app-edit-item>
           </div>
         </div>
       </modal>
@@ -72,11 +73,6 @@ export class ChecklistPage {
           title: item.title
         })
       }
-    });
-
-    effect(() => {
-      this.checklistService.listItems();
-      this.beingEditedItem.set(null);
     });
   }
 }
